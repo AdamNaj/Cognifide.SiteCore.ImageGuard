@@ -4,7 +4,6 @@ using Sitecore.Diagnostics;
 using Sitecore.Links;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Web;
 using Sitecore.Resources.Media;

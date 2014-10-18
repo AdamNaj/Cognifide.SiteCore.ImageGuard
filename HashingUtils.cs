@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Sitecore;
@@ -22,10 +21,12 @@ namespace Cognifide.SiteCore.ImageGuard
 
         public static List<string> DANGEROUS_PARAMETERS =
             new List<string>()
-                {
-                    "?w=", "?h=", "?sc=",
-                    "&w=", "&h=", "&sc="
-                };
+            {
+                "?w=", "?h=", "?sc=", "?mw=", "?mh=",
+                "&w=", "&h=", "&sc=", "&mw=", "&mh="
+            };
+
+        public static Dictionary<string, string> MediaItemCache = new Dictionary<string, string>();
 
         public static void Initialize()
         {
@@ -42,7 +43,7 @@ namespace Cognifide.SiteCore.ImageGuard
             Initialize();
             byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
             byte[] plainTextWithSaltBytes =
-                    new byte[plainTextBytes.Length + saltBytes.Length];
+                new byte[plainTextBytes.Length + saltBytes.Length];
             for (int i = 0; i < plainTextBytes.Length; i++)
                 plainTextWithSaltBytes[i] = plainTextBytes[i];
             for (int i = 0; i < saltBytes.Length; i++)
@@ -57,43 +58,53 @@ namespace Cognifide.SiteCore.ImageGuard
 
         public static bool IsDangerousAssetUrl(string url)
         {
-            int paramIndex = url.IndexOf("?");
-            bool containsDangerousparameters = false;
-
+            int paramIndex = url.IndexOf("?", StringComparison.Ordinal);
             if (paramIndex > 0) //contains parameters
             {
+                url = url.ToLower();
                 foreach (string parameter in DANGEROUS_PARAMETERS)
                 {
-                    if (url.IndexOf(parameter, paramIndex, StringComparison.OrdinalIgnoreCase) > -1)
+                    if (url.IndexOf(parameter, paramIndex, StringComparison.Ordinal) > -1)
                     {
-                        return containsDangerousparameters;
+                        return true;
                     }
                 }
             }
-
-            return false;            
+            return false;
         }
 
         private static Database CurrentDatabase { get { return Sitecore.Context.ContentDatabase ?? Sitecore.Context.Database; } }
 
         public static string GetAssetUrlHash(string url)
         {
-            UrlString imgUrl = new UrlString(url);
-            Item mediaItem = CurrentDatabase.GetItem(GetMediaPath(imgUrl.Path));
-            if (mediaItem != null)
+            UrlString imgUrl = new UrlString(url.ToLowerInvariant());
+            string path = imgUrl.Path;
+            if (!MediaItemCache.ContainsKey(path))
             {
-                string mediaUrl = mediaItem.ID.ToString();
+                Item mediaItem = CurrentDatabase.GetItem(GetMediaPath(path));
+                if (mediaItem == null)
+                {
+                    return url;
+                }
+                MediaItemCache.Add(path, mediaItem.ID.ToString());
+            }
+            if (MediaItemCache.ContainsKey(path))
+            {
                 string width = imgUrl.Parameters["w"];
                 string height = imgUrl.Parameters["h"];
+                string maxWidth = imgUrl.Parameters["mh"];
+                string maxHeight = imgUrl.Parameters["mw"];
                 string scale = imgUrl.Parameters["sc"];
-                return HashingUtils.ComputeHash(string.Format("{0}?w={1}&w={2}&sc={3}", mediaUrl, width, height, scale));
+                return
+                    ComputeHash(string.Format("{0}?w={1}&h={2}&sc={3}&mw={4}&mh={5}",
+                        new object[] {MediaItemCache[path], width, height, scale, maxHeight, maxWidth}));
             }
             return url;
         }
 
         public static string ProtectAssetUrl(string url)
         {
-            return url + "&hash=" + GetAssetUrlHash(url);
+            return url + "&amp;hash=" + GetAssetUrlHash(url);
         }
 
         public static bool IsUrlHashValid(string url)
@@ -101,7 +112,7 @@ namespace Cognifide.SiteCore.ImageGuard
             var hash = GetAssetUrlHash(url);
             UrlString parsedUrl = new UrlString(url);
             var urlHash = parsedUrl.Parameters["hash"];
-            return (hash.Equals(urlHash, StringComparison.OrdinalIgnoreCase));
+            return hash.Equals(urlHash, StringComparison.OrdinalIgnoreCase);
         }
 
         protected static string GetMediaPath(string localPath)
@@ -125,10 +136,7 @@ namespace Cognifide.SiteCore.ImageGuard
                 return string.Empty;
             if (ShortID.IsShortID(id))
                 return ShortID.Decode(id);
-            return "/sitecore/media library/" + id.TrimStart(new char[1]
-                                                                 {
-                                                                     '/'
-                                                                 });
+            return ("/sitecore/media library/" + id.TrimStart(new[] {'/'}));
         }
 
     }
