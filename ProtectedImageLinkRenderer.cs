@@ -48,7 +48,7 @@ namespace Cognifide.SiteCore.ImageGuard
             {
                 return renderedText;
             }
-            int tagIndex;
+            int tagIndex = 0;
             int tagCloseIndex;
             int index = 0;
             bool containsDangerousParams = false;
@@ -69,18 +69,19 @@ namespace Cognifide.SiteCore.ImageGuard
                 return renderedText;
 
             // ok, problematic content found - let's augment it with hash
-            index = 0;
-            StringBuilder builder = new StringBuilder(renderedText.Length + 128);
+            
+            // copy the non-problematic part of the content first
+            StringBuilder builder = new StringBuilder(renderedText, 0, tagIndex, renderedText.Length + 128);
+            
+            //start with the problematic content
+            index = tagIndex;
             while (index < renderedText.Length)
             {
                 tagIndex = renderedText.IndexOf("<img", index, StringComparison.OrdinalIgnoreCase);
                 if (tagIndex > -1)
                 {
-                    tagCloseIndex = renderedText.IndexOf(">", tagIndex, StringComparison.OrdinalIgnoreCase) + 1;
                     builder.Append(renderedText.Substring(index, tagIndex - index));
-                    string imgTag = renderedText.Substring(tagIndex, tagCloseIndex - tagIndex);
-                    builder.Append(ReplaceReference(imgTag));
-                    index = tagCloseIndex;
+                    ReplaceReference(renderedText, builder, tagIndex, ref index);
                 }
                 else
                 {
@@ -94,18 +95,22 @@ namespace Cognifide.SiteCore.ImageGuard
         private char[] quotes = new char[]{'\'', '\"'};
 
 
-        private string ReplaceReference(string imgTag)
+        private void ReplaceReference(string renderedText, StringBuilder builder, int tagIndex, ref int index)
         {
-            int urlStartindex = imgTag.IndexOf("src", StringComparison.OrdinalIgnoreCase) + 3;
-            urlStartindex = imgTag.IndexOfAny(quotes, urlStartindex) + 1;
-            int urlEndIndex = imgTag.IndexOfAny(quotes, urlStartindex);
-            string url = imgTag.Substring(urlStartindex, urlEndIndex - urlStartindex);
-            if (!url.Contains("?"))
+            int urlStartIndex = renderedText.IndexOf("src", tagIndex, StringComparison.OrdinalIgnoreCase) + 3;
+            urlStartIndex = renderedText.IndexOfAny(quotes, urlStartIndex) + 1;
+            int urlEndIndex = renderedText.IndexOfAny(quotes, urlStartIndex);
+            index = urlEndIndex;
+            if (renderedText.IndexOf("?", urlStartIndex, urlEndIndex - urlStartIndex, StringComparison.Ordinal) < 0)
             {
-                return imgTag; // no parameters, no need to arm the URL;
+                builder.Append(renderedText.Substring(tagIndex, urlEndIndex - tagIndex));
+                return; // no parameters, no need to arm the URL;
             }
+            string url = renderedText.Substring(urlStartIndex, urlEndIndex - urlStartIndex);
             url = HashingUtils.ProtectAssetUrl(url);
-            return imgTag.Substring(0, urlStartindex) + url + imgTag.Substring(urlEndIndex, imgTag.Length - urlEndIndex);
+            builder.Append(renderedText.Substring(tagIndex, urlStartIndex - tagIndex));
+            builder.Append(url);
+            // we don't need to copy the rest of the tag as it will be supplemented in the next runs
         }
 
     }

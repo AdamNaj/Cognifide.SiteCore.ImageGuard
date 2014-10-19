@@ -181,3 +181,29 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+bin/Debug/ComponentArt.Web.UI.dll
+bin/Debug/HtmlAgilityPack.dll
+bin/Debug/ITHit.WebDAV.Server.dll
+bin/Debug/Lucene.Net.dll
+bin/Debug/Mvp.Xml.dll
+bin/Debug/Newtonsoft.Json.dll
+bin/Debug/RadEditor.Net2.dll
+bin/Debug/Sitecore.Kernel.dll
+bin/Debug/Sitecore.Kernel.xml
+bin/Debug/Sitecore.Logging.dll
+bin/Debug/Sitecore.NVelocity.dll
+bin/Debug/Sitecore.Zip.dll
+bin/Debug/Telerik.Web.UI.dll
+bin/Release/ComponentArt.Web.UI.dll
+bin/Release/HtmlAgilityPack.dll
+bin/Release/ITHit.WebDAV.Server.dll
+bin/Release/Lucene.Net.dll
+bin/Release/Mvp.Xml.dll
+bin/Release/Newtonsoft.Json.dll
+bin/Release/RadEditor.Net2.dll
+bin/Release/Sitecore.Kernel.dll
+bin/Release/Sitecore.Kernel.xml
+bin/Release/Sitecore.Logging.dll
+bin/Release/Sitecore.NVelocity.dll
+bin/Release/Sitecore.Zip.dll
+bin/Release/Telerik.Web.UI.dll
