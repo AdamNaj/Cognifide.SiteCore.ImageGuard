@@ -8,8 +8,8 @@
     <ProjectGuid>{3AC2CBA9-DDCD-4244-9700-C96498E35FDE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Cognifide.SiteCore.ImageGuard</RootNamespace>
-    <AssemblyName>Cognifide.SiteCore.ImageGuard</AssemblyName>
+    <RootNamespace>Cognifide.ImageGuard</RootNamespace>
+    <AssemblyName>Cognifide.ImageGuard</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

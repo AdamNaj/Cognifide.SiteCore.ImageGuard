@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Text;
-using Sitecore.Data;
 using Sitecore.Pipelines.RenderField;
-using Sitecore.Text;
 
-namespace Cognifide.SiteCore.ImageGuard
+namespace Cognifide.ImageGuard
 {
     class ProtectedImageLinkRenderer
     {

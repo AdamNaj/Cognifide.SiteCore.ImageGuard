@@ -1,14 +1,8 @@
-﻿using Sitecore;
-using Sitecore.Data.Items;
+﻿using System.Web;
 using Sitecore.Diagnostics;
-using Sitecore.Links;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Web;
 using Sitecore.Resources.Media;
 
-namespace Cognifide.SiteCore.ImageGuard
+namespace Cognifide.ImageGuard
 {
     public class ProtectedMediaRequest : MediaRequest
     {
