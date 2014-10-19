@@ -11,7 +11,7 @@ using Sitecore.Resources.Media;
 using Sitecore.Text;
 using Convert = System.Convert;
 
-namespace Cognifide.SiteCore.ImageGuard
+namespace Cognifide.ImageGuard
 {
     public class HashingUtils
     {
